@@ -1,0 +1,27 @@
+{
+  "name": "search-wikipedia-links",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "scripts": {
+    "dev": "parcel",
+    "build": "parcel build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drapegnik/search-wikipedia-links.git"
+  },
+  "author": "Ivan Pazhitnykh <ivan.pazhitnykh@gmail.com> (https://github.com/Drapegnik)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Drapegnik/search-wikipedia-links/issues"
+  },
+  "homepage": "https://github.com/Drapegnik/search-wikipedia-links#readme",
+  "devDependencies": {
+    "parcel": "^2.4.1"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
