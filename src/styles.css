@@ -1,4 +1,28 @@
-h1 {
-    color: hotpink;
-    font-family: cursive;
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    align-items: right;
+  }
+  
+  .container .columns {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .container .columns input {
+    width: 300px;
+    padding: 6px;
+    font-size: 16px;
+    background-color: white;
+    margin-right: 10px;
+    border-radius: 3px;
+  }
+
+  .container .columns button {
+    text-transform: uppercase;
+    background-color: #006bb4;
+    color: white;
+    font-weight: bold;
+    border-color: #006bb4;
   }
