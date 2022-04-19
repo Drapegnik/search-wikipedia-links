@@ -5,7 +5,9 @@
   "source": "src/index.html",
   "scripts": {
     "dev": "parcel",
-    "build": "parcel build"
+    "build": "parcel build",
+    "format": "prettier --write src",
+    "lint": "eslint src --fix --cache --max-warnings=0"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,7 @@
   },
   "homepage": "https://github.com/Drapegnik/search-wikipedia-links#readme",
   "devDependencies": {
+    "@realtby/codestyle": "^0.1.18",
     "parcel": "^2.4.1"
   },
   "dependencies": {
