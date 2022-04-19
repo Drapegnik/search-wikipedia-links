@@ -1,13 +1,13 @@
 import { createRoot } from 'react-dom/client';
-import { useState, useCallback, useMemo, Fragment } from 'react';
+import { useState } from 'react';
 
-const WIKI_HOST = 'https://en.wikipedia.org/wiki/';
+const WIKI_HOST = 'https://en.wikipedia.org';
+const HISTORY_SIZE = 5;
 
-const fetchData = searchTerm => {
-  const urlSearch =
-    'https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=' + searchTerm;
+const fetchData = query => {
+  const url = `${WIKI_HOST}/w/api.php?origin=*&action=opensearch&search=${query}`;
 
-  return fetch(urlSearch, { mode: 'cors' }).then(response => response.json());
+  return fetch(url, { mode: 'cors' }).then(response => response.json());
 };
 
 /*
@@ -16,82 +16,89 @@ const fetchData = searchTerm => {
  - to keep a distinct history list of my last five search terms + the time when the last search happened
 **/
 const WikepediaLinksView = () => {
-  const [history, setHistory] = useState({});
+  const [history, setHistory] = useState([]);
   const [searchTerm, setSearchTerms] = useState('');
   const [fetchedAt, setFetchedAt] = useState(new Date());
   const [links, setLinks] = useState([]);
 
-  const handleSubmit = useCallback(
-    async query => {
-      const response = await fetchData(query);
+  const handleQuerySubmit = async query => {
+    const linksData = await fetchData(query);
+    const fetchedAtDate = new Date();
+    const historyMap = Object.fromEntries(history);
 
-      const date = new Date();
+    historyMap[query] = fetchedAtDate.getTime();
 
-      setFetchedAt(date);
-      setLinks(response[1]);
+    let nextHistory = Object.entries(historyMap);
 
-      const nextHistory = {
-        ...history,
-        [query]: date.getTime(),
-      };
+    // sort history by date (timestamp)
+    nextHistory.sort((a, b) => b[1] - a[1]);
+    nextHistory = nextHistory.slice(0, HISTORY_SIZE);
 
-      setHistory(nextHistory);
-    },
-    [setFetchedAt, setLinks, history, setHistory]
-  );
-
-  const handleHistoryClick = useCallback(
-    historySearch => {
-      setSearchTerms(historySearch);
-      handleSubmit(historySearch);
-    },
-    [setSearchTerms, handleSubmit]
-  );
-
-  const historyList = useMemo(() => {
-    const kv = Object.entries(history);
-
-    kv.sort((a, b) => b[1] - a[1]);
-    return kv.slice(0, 5);
-  }, [history]);
+    setFetchedAt(fetchedAtDate);
+    setLinks(linksData[1]);
+    setHistory(nextHistory);
+    setSearchTerms('');
+  };
 
   return (
     <div className="container">
-      <div className="columns">
+      <form
+        className="columns"
+        onSubmit={e => {
+          e.preventDefault();
+          handleQuerySubmit(searchTerm);
+        }}
+      >
         <input
-          type="text"
+          type="search"
           placeholder="You Know, for Search…"
           value={searchTerm}
           onChange={e => {
             setSearchTerms(e.target.value);
           }}
         />
-        <button onClick={() => handleSubmit(searchTerm)}>Search</button>
-      </div>
-      <div>
-        <ul>
-          {historyList.map(([query, date]) => (
-            <li key={query} onClick={() => handleHistoryClick(query)}>
-              {query} - {date}
-            </li>
-          ))}
-        </ul>
-      </div>
+        <button type="submit">Search</button>
+      </form>
       <div>
         <dl>
-          <dt>Your Wikipedia links (fetched at {fetchedAt.toISOString()}):</dt>
-          <dd>
-            {links.map(l => (
-              <Fragment key={l}>
-                <a href={`${WIKI_HOST}${l}`} target="_blank" rel="noreferrer">
-                  {l}
-                </a>{' '}
-                <br />
-              </Fragment>
-            ))}
-          </dd>
-          <dt>Previous search term:</dt>
-          <dd />
+          {!!history.length && (
+            <>
+              <dt>Previous search term:</dt>
+              <dd>
+                <ol>
+                  {history.map(([query, date]) => (
+                    <li key={query}>
+                      <span>{`${query} (fetched at: ${new Date(
+                        date
+                      ).toLocaleTimeString()}) `}</span>
+                      <button
+                        onClick={() => {
+                          setSearchTerms(query);
+                          handleQuerySubmit(query);
+                        }}
+                      >
+                        show
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </dd>
+            </>
+          )}
+          {!!links.length && (
+            <>
+              <dt>Your Wikipedia links (fetched at {fetchedAt.toLocaleString()}):</dt>
+              <dd>
+                {links.map(name => (
+                  <p key={name}>
+                    <a href={`${WIKI_HOST}/wiki/${name}`} target="_blank" rel="noreferrer">
+                      {name}
+                    </a>
+                  </p>
+                ))}
+              </dd>
+            </>
+          )}
         </dl>
       </div>
     </div>
